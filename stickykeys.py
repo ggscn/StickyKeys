@@ -31,6 +31,9 @@ class TypoText:
         dekonized_str = TreebankWordDetokenizer().detokenize(tokens)
         return dekonized_str
 
+    def get_modifiable_tokens(self) -> list:
+        return [t for t in self.tokens if t.isalpha()]
+
     def get_random_nearby_list_item(self, target_list: list, target_index: int) -> int:
         operators = ['add', 'sub']
         operation = getattr(
@@ -67,7 +70,6 @@ class TypoText:
         char = token[char_index]
 
         keyboard_layout = Keyboard.layout
-        print(char)
         char_row_index = [i for i, x in enumerate(
             keyboard_layout) if char in x][0]
         char_inner_row_index = keyboard_layout[
@@ -106,7 +108,6 @@ class TypoText:
         return token_str
 
     def process(self, num_typos=1, method=None):
-        print(self.tokens)
         for i in range(0, num_typos):
             if method is None:
                 methods = ['swap_keys', 'mispress_keys']
@@ -114,10 +115,7 @@ class TypoText:
                 method = getattr(
                     self, methods[method_index])
             token = self.get_random_list_item(
-                self.tokens)
+                self.get_modifiable_tokens())
             typo_token = method(token)
             self.tokens[self.tokens.index(token)] = typo_token
         return self.dekonize(self.tokens)
-
-text = 'This sentence is grammatically incorrect.'
-print(TypoText(text).process(2))
