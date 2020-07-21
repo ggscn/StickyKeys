@@ -2,6 +2,7 @@ import ctypes
 from nltk.tokenize import word_tokenize
 from random import choice
 import nltk
+from nltk.tokenize.treebank import TreebankWordDetokenizer
 import time
 import random
 import operator
@@ -26,6 +27,10 @@ class TypoText:
         tokens = word_tokenize(text)
         return tokens
 
+    def dekonize(self, tokens: list) -> str:
+        dekonized_str = TreebankWordDetokenizer().detokenize(tokens)
+        return dekonized_str
+
     def get_random_nearby_list_item(self, target_list: list, target_index: int) -> int:
         operators = ['add', 'sub']
         operation = getattr(
@@ -40,11 +45,12 @@ class TypoText:
     def generate_random_number(self, num_digits=1):
         """Raise current timestamp to the power 2 and return if number is even 
         or odd. Continue for num_digits"""
-        num = int(time.time())
+        seed = int(time.time())
+        m = 253
         for i in range(0, num_digits):
-            num *= (num % 10)
-            print(num % 10)
-            yield (num % 2) == 0
+            seed **= 2
+            rand_num = seed % m
+            yield (rand_num % 2) == 0
 
     def get_random_list_item(self, target_list: list):
         list_length = len(target_list) - 1
@@ -111,7 +117,7 @@ class TypoText:
                 self.tokens)
             typo_token = method(token)
             self.tokens[self.tokens.index(token)] = typo_token
-        return ' '.join(self.tokens)
+        return self.dekonize(self.tokens)
 
 text = 'This sentence is grammatically incorrect.'
-TypoText(text).process()
+print(TypoText(text).process(2))
